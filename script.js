@@ -172,6 +172,7 @@ const disabledRadioEffect = () => {
     element.classList.add("no-hover");
   });
 };
+
 startbtn.style.display = "block";
 nextButton.style.display = "none";
 disabledRadioBtn();
@@ -212,7 +213,6 @@ function updateTime() {
   if (min < 0) {
     clearInterval(timerInterval);
     endGame();
-
     return;
   }
   let minutes = Math.floor(min / 60);
@@ -233,6 +233,12 @@ function usedTime() {
   let timeUsed = timerMin - remainingTime;
   let usedMin = Math.floor(timeUsed / 60);
   let usedSeconds = timeUsed % 60;
+
+  // Format seconds with leading zero if needed
+  if (usedSeconds < 10) {
+    usedSeconds = "0" + usedSeconds;
+  }
+
   return `${usedMin}:${usedSeconds}`;
 }
 
@@ -269,20 +275,18 @@ displayScore.textContent = `Your Score: 0/${quizData.length}`;
 function updateScore() {
   displayScore.textContent = `Your Score: ${correctAns}/${quizData.length}`;
 }
-let correctAnsScore;
 
 //check correct ans
 function checkAns() {
   let selectedOption = document.querySelector('input[name="answer"]:checked');
-  const correntAnsIndex = quizData[qsNumber].correct;
+  const correctAnsIndex = quizData[qsNumber].correct; // Fixed typo
 
-  if (parseInt(selectedOption.value) === correntAnsIndex) {
+  if (parseInt(selectedOption.value) === correctAnsIndex) {
     correctAns++;
-
     selectedOption.closest(".option-label").classList.add("correct");
   } else {
     selectedOption.closest(".option-label").classList.add("wrong");
-    radioBtns[correntAnsIndex]
+    radioBtns[correctAnsIndex]
       .closest(".option-label")
       .classList.add("correct");
   }
@@ -333,6 +337,8 @@ nextButton.addEventListener("click", nextBtnFunctionality);
 
 //changing next button into end game and adding functionality
 const nextBtnSecondFunc = () => {
+  addNewSCore();
+
   qsSection.style.display = "none";
   optionForm.style.display = "none";
   btnContainer.style.display = "none";
@@ -345,7 +351,6 @@ const nextBtnSecondFunc = () => {
 //end game functionality
 function endGame() {
   totalScore.textContent = `Your Score: ${correctAns}/${quizData.length}`;
-  addNewSCore();
   nextButton.removeEventListener("click", nextBtnFunctionality);
   nextButton.disabled = false;
   nextButton.innerHTML = "End Game";
@@ -358,12 +363,11 @@ function endGame() {
 // start new game logic functionality reseting all variables
 function startNewewGame() {
   newGame.addEventListener("click", () => {
-    usedTime();
+    clearInterval(timerInterval);
     min = timerMin;
     remainingTime = timerMin;
     updateTime();
 
-    //score printer
     correctAns = 0;
     displayScore.textContent = `Score: 0/${quizData.length}`;
 
@@ -408,14 +412,34 @@ function startNewewGame() {
 }
 startNewewGame();
 
+// Clean old scores and add timestamp for 24-hour expiration
+function cleanOldScores() {
+  const scores = JSON.parse(localStorage.getItem("quizScore")) || [];
+  const now = new Date().getTime();
+  const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+  // Filter out scores older than 24 hours
+  const validScores = scores.filter((score) => {
+    return score.timestamp && now - score.timestamp < twentyFourHours;
+  });
+
+  // Update localStorage with valid scores only
+  localStorage.setItem("quizScore", JSON.stringify(validScores));
+  return validScores;
+}
+
 //adding new score to local storage and fetching it for leader board
 function addNewSCore() {
+  // Clean old scores first
+  cleanOldScores();
+
   let scoreObj = {
     score: `${correctAns}/${quizData.length}`,
     time: usedTime(),
+    timestamp: new Date().getTime(), // Add timestamp for 24-hour expiration
   };
-  const saved = JSON.parse(localStorage.getItem("quizScore")) || [];
 
+  const saved = JSON.parse(localStorage.getItem("quizScore")) || [];
   const allUpdatedScore = [...saved, scoreObj];
   localStorage.setItem("quizScore", JSON.stringify(allUpdatedScore));
   displayingLeaderBoard();
@@ -423,7 +447,9 @@ function addNewSCore() {
 
 //displaying top 3 scorer on leader board
 function displayingLeaderBoard() {
-  const topScorer = JSON.parse(localStorage.getItem("quizScore")) || [];
+  // Clean old scores before displaying
+  const topScorer = cleanOldScores();
+
   const leaderBoard = topScorer.map((result) => {
     const [correct, total] = result.score.split("/").map(Number);
     const [totalMin, totalSec] = result.time.split(":").map(Number);
@@ -433,23 +459,27 @@ function displayingLeaderBoard() {
       totalTime: totalMin * 60 + totalSec,
     };
   });
+
   const sorted = leaderBoard.sort((a, b) => {
     if (a.scorePercentage !== b.scorePercentage) {
       return b.scorePercentage - a.scorePercentage;
     } else return a.totalTime - b.totalTime;
   });
+
   const tops = [1, 2, 3].map((i) => {
     const items = sorted[i - 1];
     if (items) {
-      return `Score: ${items.originalResult.score} time:${items.originalResult.time}`;
+      return `Score: ${items.originalResult.score} Time: ${items.originalResult.time}`;
     } else {
-      return "Score:- Time:-";
+      return "Score: - Time: -";
     }
   });
+
   document.querySelector("#top1").textContent = tops[0];
   document.querySelector("#top2").textContent = tops[1];
   document.querySelector("#top3").textContent = tops[2];
 }
+
 document.addEventListener("DOMContentLoaded", () => {
   displayingLeaderBoard();
 });
