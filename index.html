@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Quiz App</title>
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <div class="quiz-container">
+      <h1 class="quiz-title">Interactive Quiz</h1>
+
+      <div class="leaderboard" id="leaderboard">
+        <h2 class="leaderboard-title">🏆 Top Scores</h2>
+        <div class="top-scores" id="topScores">
+          <div class="score-item empty">
+            <span class="rank">1st</span>
+            <span class="score-info" id="top1">No scores yet</span>
+          </div>
+          <div class="score-item empty">
+            <span class="rank">2nd</span>
+            <span class="score-info" id="top2">No scores yet</span>
+          </div>
+          <div class="score-item empty">
+            <span class="rank">3rd</span>
+            <span class="score-info" id="top3">No scores yet</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="question-section">
+        <p class="question-text" id="question">
+          What is the capital of France?
+        </p>
+      </div>
+
+      <form class="options-form" id="optionsForm">
+        <label class="option-label">
+          <input type="radio" name="answer" value="0" class="option-radio" />
+          <span class="option-text">London</span>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="answer" value="1" class="option-radio" />
+          <span class="option-text">Berlin</span>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="answer" value="2" class="option-radio" />
+          <span class="option-text">Paris</span>
+        </label>
+        <label class="option-label">
+          <input type="radio" name="answer" value="3" class="option-radio" />
+          <span class="option-text">Madrid</span>
+        </label>
+      </form>
+
+      <div class="button-container">
+        <button class="start-button" id="startBtn">Start Quiz</button>
+        <button class="next-button" id="nextBtn" style="display: none">
+          Next Question
+        </button>
+      </div>
+
+      <div class="quiz-info">
+        <p class="score-display" id="score">Score: 0/10</p>
+        <p class="timer-display" id="timer">Time: 5:00</p>
+      </div>
+
+      <div class="result-screen" id="resultScreen">
+        <h2 class="result-title">Quiz Completed!</h2>
+        <p class="result-score" id="finalScore">Your Score: 0/10</p>
+        <button class="restart-button" id="restartBtn">Start New Quiz</button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
